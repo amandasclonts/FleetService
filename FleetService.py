@@ -104,4 +104,50 @@ else:
         st.bar_chart(cost_chart)
 
         st.markdown("### Average Miles Between Services by Vendor & Vehicle")
-        st.da
+        st.dataframe(vendor_vehicle_miles, use_container_width=True)
+
+    # ---------- SERVICE FREQUENCY TAB ----------
+    with tab_freq:
+        st.subheader("Service Frequency")
+
+        # Optional filters
+        vehicles = ["All"] + sorted(service_freq["Vehicle Name"].unique().tolist())
+        services = ["All"] + sorted(service_freq["Service Tasks"].unique().tolist())
+
+        c1, c2 = st.columns(2)
+        selected_vehicle = c1.selectbox("Filter by Vehicle", vehicles)
+        selected_service = c2.selectbox("Filter by Service Task", services)
+
+        freq_filtered = service_freq.copy()
+        if selected_vehicle != "All":
+            freq_filtered = freq_filtered[freq_filtered["Vehicle Name"] == selected_vehicle]
+        if selected_service != "All":
+            freq_filtered = freq_filtered[freq_filtered["Service Tasks"] == selected_service]
+
+        st.dataframe(freq_filtered, use_container_width=True)
+
+        # Chart: service count per vehicle
+        st.markdown("### Service Count per Vehicle")
+        freq_by_vehicle = (
+            service_freq.groupby("Vehicle Name")["Service Count"]
+            .sum()
+            .reset_index()
+            .sort_values("Service Count", ascending=False)
+        )
+        st.bar_chart(freq_by_vehicle.set_index("Vehicle Name")["Service Count"])
+
+        # Chart: service count per service task
+        st.markdown("### Service Count per Service Task")
+        freq_by_task = (
+            service_freq.groupby("Service Tasks")["Service Count"]
+            .sum()
+            .reset_index()
+            .sort_values("Service Count", ascending=False)
+        )
+        st.bar_chart(freq_by_task.set_index("Service Tasks")["Service Count"])
+
+    # ---------- RAW DATA TAB ----------
+    with tab_raw:
+        st.subheader("Full Dataset (with Miles Between Service)")
+        st.dataframe(df, use_container_width=True)
+

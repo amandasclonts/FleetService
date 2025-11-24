@@ -13,6 +13,18 @@ else:
     df = pd.read_excel(uploaded)
     df.columns = df.columns.str.strip()
 
+# 🔹 Remove exact duplicate service rows so they don't skew totals
+    df = df.drop_duplicates(
+        subset=[
+            "Vehicle Name",
+            "Completed At",
+            "Meter",
+            "Service Tasks",
+            "Vendor Name",
+            "Total Cost (USD)",
+        ]
+    )
+
     # Ensure needed columns exist
     required_cols = [
         "Vehicle Name",
